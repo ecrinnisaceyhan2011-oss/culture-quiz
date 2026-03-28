@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nisa | Culture Quiz 🌍</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background: #fff5f8;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 100vh;
+        }
+        .quiz-card {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(248, 187, 208, 0.3);
+            text-align: center;
+            width: 90%; max-width: 450px;
+        }
+        h1 { color: #880e4f; margin-bottom: 20px; font-size: 24px; }
+        .question { font-size: 18px; font-weight: 600; color: #5d4037; margin-bottom: 25px; min-height: 60px; }
+        
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn {
+            background: #fce4ec;
+            border: 2px solid #f8bbd0;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #880e4f;
+            font-weight: 600;
+        }
+        .option-btn:hover { background: #f8bbd0; transform: translateY(-2px); }
+        
+        #score-board { margin-top: 25px; font-size: 18px; font-weight: 700; color: #ad1457; }
+        #feedback { margin-top: 15px; font-weight: 600; min-height: 25px; }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-card">
+        <h1>Türk Kültürü Bilgi Yarışması 🥨</h1>
+        
+        <div id="quiz-area">
+            <div class="question" id="question-text">Soru buraya gelecek...</div>
+            <div class="options" id="options-area">
+                </div>
+        </div>
+
+        <div id="feedback"></div>
+        <div id="score-board">Puan: 0</div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "Hangi yiyecek Türk kültüründe 'simit' olarak bilinir?", a: ["Pizza", "🥨 Gevrek/Simit", "Hamburger"], correct: 1 },
+            { q: "Türkiye'nin başkenti neresidir?", a: ["İstanbul", "İzmir", "Ankara"], correct: 2 },
+            { q: "Misafirlikte ikram edilen geleneksel içecek?", a: ["🥤 Kolalı İçecek", "☕ Türk Kahvesi", "🍹 Portakal Suyu"], correct: 1 }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question-text').innerText = q.q;
+            const optionsArea = document.getElementById('options-area');
+            optionsArea.innerHTML = "";
+
+            q.a.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = option;
+                btn.onclick = () => checkAnswer(index);
+                optionsArea.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(index) {
+            const feedback = document.getElementById('feedback');
+            if (index === questions[currentQuestion].correct) {
+                score += 10;
+                feedback.innerText = "Doğru! 🎉";
+                feedback.style.color = "#4caf50";
+            } else {
+                feedback.innerText = "Yanlış! ☁️";
+                feedback.style.color = "#f44336";
+            }
+
+            document.getElementById('score-board').innerText = "Puan: " + score;
+            
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                setTimeout(loadQuestion, 1000); // 1 saniye sonra yeni soruya geç
+            } else {
+                setTimeout(() => {
+                    document.getElementById('quiz-area').innerHTML = "<h2>Yarışma Bitti! ✨</h2>";
+                    feedback.innerText = "Tebrikler Nisa!";
+                }, 1000);
+            }
+        }
+
+        loadQuestion(); // İlk soruyu başlat
+    </script>
+
+</body>
+</html>
