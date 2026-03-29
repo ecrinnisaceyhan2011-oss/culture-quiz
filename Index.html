@@ -9,128 +9,87 @@
             margin: 0; padding: 0;
             background: #fff5f8;
             font-family: 'Segoe UI', sans-serif;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
         }
         .quiz-card {
             background: white;
             padding: 30px;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(248, 187, 208, 0.3);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(248, 187, 208, 0.4);
             text-align: center;
-            width: 90%; max-width: 450px;
+            width: 90%; max-width: 400px;
         }
-        h1 { color: #880e4f; margin-bottom: 20px; }
-        .question { font-size: 20px; font-weight: 600; color: #5d4037; margin-bottom: 25px; }
-        
-        .options { display: flex; flex-direction: column; gap: 15px; }
-        .option-btn {
-            background: #fce4ec;
-            border: 2px solid #f8bbd0;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: #880e4f;
-            font-weight: 600;
+        h1 { color: #880e4f; margin-bottom: 20px; font-size: 22px; }
+        .question { font-size: 18px; color: #5d4037; font-weight: 600; margin-bottom: 20px; }
+        .options { display: grid; gap: 10px; }
+        .btn {
+            background: #fce4ec; border: 2px solid #f8bbd0;
+            padding: 12px; border-radius: 12px; cursor: pointer;
+            font-weight: 600; color: #880e4f; transition: 0.3s;
         }
-        .option-btn:hover:not(:disabled) { background: #f8bbd0; transform: scale(1.02); }
-        .option-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-        
-        #score-board { margin-top: 25px; font-size: 20px; font-weight: 700; color: #ad1457; }
-        #feedback { margin-top: 15px; font-weight: 600; min-height: 30px; }
-        
-        .restart-btn {
-            margin-top: 20px;
-            background: #880e4f;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: none;
-        }
+        .btn:hover { background: #f8bbd0; transform: scale(1.02); }
+        #score { margin-top: 20px; font-weight: bold; color: #ad1457; }
+        #feedback { margin-top: 10px; height: 20px; font-weight: 600; }
+        .reset-btn { margin-top: 15px; display: none; background: #880e4f; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="quiz-card" id="main-card">
-        <h1>Türk Kültürü Testi 🥨</h1>
-        
-        <div id="quiz-content">
-            <div class="question" id="question-text">Soru Yükleniyor...</div>
-            <div class="options" id="options-area"></div>
+    <div class="quiz-card">
+        <h1>Kültür Testi 🥨</h1>
+        <div id="game">
+            <div class="question" id="q-text">Yükleniyor...</div>
+            <div class="options" id="options"></div>
         </div>
-
         <div id="feedback"></div>
-        <div id="score-board">Puan: 0</div>
-        <button class="restart-btn" id="restart" onclick="location.reload()">Tekrar Oyna 🔄</button>
+        <div id="score">Puan: 0</div>
+        <button id="reset" class="reset-btn" onclick="location.reload()">Tekrar Dene 🔄</button>
     </div>
 
     <script>
-        const myQuestions = [
-            { q: "Hangi yiyecek Türk kültüründe 'gevrek' olarak da bilinir?", a: ["Pizza", "Simit 🥨", "Kek"], correct: 1 },
-            { q: "Türkiye'nin başkenti neresidir?", a: ["İstanbul", "Ankara 🇹🇷", "İzmir"], correct: 1 },
-            { q: "Geleneksel bir Türk içeceği hangisidir?", a: ["Ayran 🥛", "Kola", "Limonata"], correct: 0 },
-            { q: "Hangi şehir dondurmasıyla meşhurdur?", a: ["Kahramanmaraş 🍦", "Adana", "Antalya"], correct: 0 }
+        const data = [
+            { q: "Simit en çok hangi şehirle özdeşleşir?", a: ["Ankara", "İzmir (Gevrek)", "İstanbul"], c: 1 },
+            { q: "Türk kahvesinin yanında ne ikram edilir?", a: ["Lokum", "Bisküvi", "Çikolata"], c: 0 },
+            { q: "Hangi tatlı 'Sütlü' bir tatlıdır?", a: ["Baklava", "Sütlaç", "Kübebe"], c: 1 }
         ];
 
-        let currentIdx = 0;
-        let myScore = 0;
+        let index = 0;
+        let puan = 0;
 
-        function showQuestion() {
-            if (currentIdx >= myQuestions.length) {
-                finishQuiz();
+        function render() {
+            if (index >= data.length) {
+                document.getElementById('game').innerHTML = "<h2>Bitti! Harikasın Nisa ✨</h2>";
+                document.getElementById('reset').style.display = "inline-block";
                 return;
             }
-
-            const currentQ = myQuestions[currentIdx];
-            document.getElementById('question-text').innerText = currentQ.q;
-            const area = document.getElementById('options-area');
-            area.innerHTML = "";
-            document.getElementById('feedback').innerText = "";
-
-            currentQ.a.forEach((opt, i) => {
+            const item = data[index];
+            document.getElementById('q-text').innerText = item.q;
+            const ops = document.getElementById('options');
+            ops.innerHTML = "";
+            item.a.forEach((opt, i) => {
                 const b = document.createElement('button');
-                b.className = 'option-btn';
+                b.className = "btn";
                 b.innerText = opt;
-                b.onclick = () => check(i);
-                area.appendChild(b);
+                b.onclick = () => {
+                    if(i === item.c) {
+                        puan += 10;
+                        document.getElementById('feedback').innerText = "Doğru! 🎉";
+                        document.getElementById('feedback').style.color = "green";
+                    } else {
+                        document.getElementById('feedback').innerText = "Yanlış! ❌";
+                        document.getElementById('feedback').style.color = "red";
+                    }
+                    document.getElementById('score').innerText = "Puan: " + puan;
+                    index++;
+                    setTimeout(render, 1000);
+                };
+                ops.appendChild(b);
             });
         }
 
-        function check(selected) {
-            // Butonları kilitle (spam tıklamayı engelle)
-            const buttons = document.querySelectorAll('.option-btn');
-            buttons.forEach(btn => btn.disabled = true);
-
-            const feed = document.getElementById('feedback');
-            
-            if (selected === myQuestions[currentIdx].correct) {
-                myScore += 10;
-                feed.innerText = "Harika! Doğru ✅";
-                feed.style.color = "#4caf50";
-            } else {
-                feed.innerText = "Üzgünüm, Yanlış! ❌";
-                feed.style.color = "#f44336";
-            }
-
-            document.getElementById('score-board').innerText = "Puan: " + myScore;
-            
-            currentIdx++;
-            
-            // Kısa bir beklemeden sonra sonraki soruya geç
-            setTimeout(showQuestion, 1200);
-        }
-
-        function finishQuiz() {
-            document.getElementById('quiz-content').innerHTML = "<h2>Test Bitti! 🏆</h2>";
-            document.getElementById('restart').style.display = "inline-block";
-            document.getElementById('feedback').innerText = "Tebrikler!";
-        }
-
-        window.onload = showQuestion;
+        // Sayfa hazır olduğunda başlat
+        window.onload = render;
     </script>
 </body>
 </html>
